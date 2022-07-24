@@ -1,0 +1,18 @@
+legend:
+  fontsize: 15
+  loc: "best"
+font:
+  size: 14
+figure:
+  figsize: [ 10.0, 8.0 ]
+image:
+  interpolation: "nearest"
+  cmap: "gray"
+savefig:
+  bbox: "tight"
+  format: "svg"
+  transparent: True
+lines:
+  linewidth: 3
+  markersize: 6
+
