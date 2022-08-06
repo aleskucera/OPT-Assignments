@@ -10,13 +10,5 @@ def load_data(path: str) -> dict:
     return data
 
 
-def load_config(path: str) -> dict:
-    with open(path, 'r') as f:
-        config = yaml.safe_load(f)
-    for key, value in config.items():
-        plt.rc(key, **value)
-    return config
-
-
 if __name__ == "__main__":
     load_data("/home/ales/OneDrive/School/5. semestr/OPT/OPT-Assignments/01_mzda_a_teplota/data/mzdy.txt")
