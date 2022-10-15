@@ -1,10 +1,10 @@
 legend:
-  fontsize: 15
+  fontsize: 12
   loc: "best"
 font:
-  size: 14
+  size: 11
 figure:
-  figsize: [ 10.0, 8.0 ]
+  figsize: [ 8.0, 6.0 ]
 image:
   interpolation: "nearest"
   cmap: "gray"
