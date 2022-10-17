@@ -31,10 +31,10 @@ def quarter2_2009(x: np.ndarray) -> np.ndarray:
     return x[0] + x[1] * time
 
 
-def fit_temps(T: np.ndarray, t: np.ndarray, omega: float) -> np.ndarray:
+def fit_temps(t: np.ndarray, T: np.ndarray, omega: float) -> np.ndarray:
     """ Fit harmonic function to temperatures data
-    :param T: years
     :param t: temperatures
+    :param T: years
     :param omega: angular frequency
     :return: coefficients of harmonic function
     """
