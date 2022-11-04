@@ -7,6 +7,10 @@ from matplotlib import animation
 from matplotlib import patches as mpatches
 from matplotlib import pyplot as plt
 
+import matplotlib
+
+matplotlib.use('TkAgg')
+
 
 def set_axes_equal(ax):
     '''Make axes of 3D plot have equal scale so that spheres appear as spheres,
@@ -90,10 +94,9 @@ def fitlin(A: np.ndarray, k: int) -> Tuple[np.ndarray, np.ndarray]:
     U = np.random.rand(m, k)
     C = np.random.rand(k, n)
 
-    u, s, vh = np.linalg.svd(A, full_matrices=True)
-    sk = np.zeros_like(A)
-    sk[:k, :k] = np.diag(s[:k])
-    print(u.shape, sk.shape, vh.shape)
+    u, s, vh = np.linalg.svd(A, full_matrices=False)
+    U = u[:, :k]
+    C = U.T @ A
     return U,C
 
 def fitaff(A: np.ndarray, k: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -113,10 +116,12 @@ def fitaff(A: np.ndarray, k: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
        - Output: (m,k), (k,n), (m,)
     """
 
-    m,n = A.shape 
-    U = 1000*np.random.rand(m, k)
-    C = np.random.rand(k, n)
-    b0 = np.random.rand(m)
+    b0 = np.mean(A, axis=1, keepdims=True)
+
+    A_m = A - b0
+    u, s, vh = np.linalg.svd(A, full_matrices=False)
+    U = u[:, :k]
+    C = U.T @ A_m
     return U, C, b0
 
 def erraff(A: np.ndarray) -> np.ndarray:
@@ -144,9 +149,12 @@ def drawfitline(A: np.ndarray) -> None:
     Shape:
        - Input: (2,n)
     """
-
+    U, C, b0 = fitaff(A, 1)
     plt.subplot(221)
-    plt.plot(A)
+    plt.scatter(A[0,:], A[1,:], color='r', marker='x')
+    p = np.linspace(-3, 3, 10)
+    x = U*p + b0
+    plt.plot(x[0], x[1], color='green')
     plt.title('drawfitline')
 
 def plottraj2(C: np.ndarray) -> None:
@@ -169,14 +177,12 @@ if(__name__ == '__main__'):
     drawfitline(A)
 
     conn = np.loadtxt('data/connected_points.txt', comments='%', dtype=int)-1
-    filename = 'run4.txt' # see the data folder and try more examples
+    filename = 'paper3.txt' # see the data folder and try more examples
     A = np.loadtxt('data/' + filename).T
-    k = 2 # dimension of affine approximation
+    k = 4 # dimension of affine approximation
 
-    U, C = fitlin(A, k)
-    B = U @ C
-    # U, C, b0 = fitaff(A,k)
-    # B = U@C+b0.reshape(-1,1)
+    U, C, b0 = fitaff(A,k)
+    B = U@C+b0.reshape(-1,1)
 
 
     plottraj2(C[:2])

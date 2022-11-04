@@ -49,7 +49,7 @@ def FindLimits(data: dict) -> dict:
 
 
 # plot 3d animation with matplotlib from numpy array
-def Plot3DAnimation(data: dict, connections: dict, limits: dict) -> None:
+def Plot3DAnimation(data: dict, connections: list, limits: dict) -> None:
     fig = plt.figure()
     ax = p3.Axes3D(fig, auto_add_to_figure=False)
     fig.add_axes(ax)
