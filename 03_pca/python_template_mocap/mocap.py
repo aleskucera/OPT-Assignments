@@ -9,7 +9,7 @@ from matplotlib import pyplot as plt
 
 import matplotlib
 
-matplotlib.use('TkAgg')
+# matplotlib.use('TkAgg')
 
 
 def set_axes_equal(ax):
@@ -41,6 +41,7 @@ def set_axes_equal(ax):
 def playmotion(conn, A, B = None):
     fig = plt.figure()
     ax = p3.Axes3D(fig)
+    ax = plt.subplot(111, projection="3d")
     ax.axis('off')
 
     conns = [x[x!=41] for x in np.split(conn, np.where(conn==41)[0]) if len(x[x!=41])]
@@ -90,10 +91,6 @@ def fitlin(A: np.ndarray, k: int) -> Tuple[np.ndarray, np.ndarray]:
        - Output: (m,k), (k,n)
     """
 
-    m,n = A.shape 
-    U = np.random.rand(m, k)
-    C = np.random.rand(k, n)
-
     u, s, vh = np.linalg.svd(A, full_matrices=False)
     U = u[:, :k]
     C = U.T @ A
@@ -119,7 +116,7 @@ def fitaff(A: np.ndarray, k: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     b0 = np.mean(A, axis=1, keepdims=True)
 
     A_m = A - b0
-    u, s, vh = np.linalg.svd(A, full_matrices=False)
+    u, s, vh = np.linalg.svd(A_m, full_matrices=False)
     U = u[:, :k]
     C = U.T @ A_m
     return U, C, b0
@@ -137,8 +134,13 @@ def erraff(A: np.ndarray) -> np.ndarray:
        - Input: (m,n)
        - Output: (m,)
     """
-
-    return A[:,0]
+    m, n = A.shape
+    A_m = A - np.mean(A, axis=1, keepdims=True)
+    u, s, vh = np.linalg.svd(A_m, full_matrices=False)
+    err = np.zeros(m)
+    for k in range(0, m):
+        err[k] = np.sum(s[k+1:]**2)
+    return err
 
 def drawfitline(A: np.ndarray) -> None:
     """ draws the optimal line fitting points from A
@@ -151,10 +153,10 @@ def drawfitline(A: np.ndarray) -> None:
     """
     U, C, b0 = fitaff(A, 1)
     plt.subplot(221)
-    plt.scatter(A[0,:], A[1,:], color='r', marker='x')
+    plt.scatter(A[0,:], A[1,:], marker='o')
     p = np.linspace(-3, 3, 10)
     x = U*p + b0
-    plt.plot(x[0], x[1], color='green')
+    plt.plot(x[0], x[1], color='r')
     plt.title('drawfitline')
 
 def plottraj2(C: np.ndarray) -> None:
@@ -168,7 +170,7 @@ def plottraj2(C: np.ndarray) -> None:
     """
 
     plt.subplot(222)
-    plt.plot(C)
+    plt.plot(C[0,:], C[1,:])
     plt.title('plottraj2')
 
 
@@ -177,9 +179,9 @@ if(__name__ == '__main__'):
     drawfitline(A)
 
     conn = np.loadtxt('data/connected_points.txt', comments='%', dtype=int)-1
-    filename = 'paper3.txt' # see the data folder and try more examples
+    filename = 'makarena1.txt' # see the data folder and try more examples
     A = np.loadtxt('data/' + filename).T
-    k = 4 # dimension of affine approximation
+    k = 2 # dimension of affine approximation
 
     U, C, b0 = fitaff(A,k)
     B = U@C+b0.reshape(-1,1)
