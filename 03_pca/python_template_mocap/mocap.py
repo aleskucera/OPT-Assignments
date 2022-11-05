@@ -151,12 +151,19 @@ def drawfitline(A: np.ndarray) -> None:
     Shape:
        - Input: (2,n)
     """
+
+    # fit a line and compute corresponding projections
     U, C, b0 = fitaff(A, 1)
+    B = U * C + b0
+
+
     plt.subplot(221)
-    plt.scatter(A[0,:], A[1,:], marker='o')
-    p = np.linspace(-3, 3, 10)
-    x = U*p + b0
-    plt.plot(x[0], x[1], color='r')
+    plt.scatter(A[0,:], A[1,:], color='red', marker='x')
+    plt.plot(B[0, :], B[1, :], color='green')
+
+    for i in range(0, A.shape[1]):
+        plt.plot([A[0,i], B[0,i]], [A[1,i], B[1,i]], color='green')
+
     plt.title('drawfitline')
 
 def plottraj2(C: np.ndarray) -> None:
