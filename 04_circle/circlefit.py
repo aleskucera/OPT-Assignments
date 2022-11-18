@@ -16,10 +16,12 @@ def fit_circle_nhom(X):
     return x
 
 def fit_circle_hom(X):
-    d = 1
-    e = 2
-    f = 0.5
-    return d,e,f
+    A = np.concatenate([np.sum(X**2, axis=1)[..., np.newaxis], X, np.ones((X.shape[0], 1))], axis=1)
+    # Singular value decomposition
+    U, S, V = np.linalg.svd(A)
+    v = V[-1, :]
+    d, e, f = v[1]/v[0], v[2]/v[0], v[3]/v[0]
+    return d, e, f
 
 def dist(X, x0, y0, r):
     """Compute the distance between the points in X and the circle with center (x0,y0) and radius r
@@ -30,15 +32,24 @@ def dist(X, x0, y0, r):
     :return: 1D array of shape (1,N) containing the distances
     """
     center = np.array([x0, y0])[np.newaxis, ...]
-    center_distance = (X - center)**2
-    center_distance = np.sum(center_distance, axis=1)
-    center_distance = np.sqrt(center_distance)
-    return center_distance - r
+    center_distance = np.linalg.norm(X - center, axis=1)
+    distance = center_distance - r
+    return distance
 
 def fit_circle_ransac(X, num_iter, threshold):
-    d,e,f = fit_circle_nhom(X)
-    x0, y0, r = quad_to_center(d,e,f)
-    return x0, y0, r
+    best_x0, best_y0, best_r = 0, 0, 0
+    best_inliers = 0
+    for i in range(num_iter):
+        indices = np.random.choice(X.shape[0], 3)
+        points = X[indices]
+        d,e,f = fit_circle_nhom(points)
+        x0, y0, r = quad_to_center(d,e,f)
+        distances = dist(X, x0, y0, r)
+        inliers = np.where(np.abs(distances) < threshold)[0]
+        if len(inliers) > best_inliers:
+            best_inliers = len(inliers)
+            best_x0, best_y0, best_r = x0, y0, r
+    return best_x0, best_y0, best_r
 
 def plot_circle(x0,y0,r, color, label):
     t = np.arange(0,2*pi,0.01)
